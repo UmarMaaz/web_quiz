@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Engineering Quiz</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 1rem;
+        }
+        .quiz-container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .option {
+            transition: background-color 0.3s;
+        }
+        .option:hover {
+            background-color: #e0e7ff;
+        }
+        .option.selected {
+            background-color: #a5b4fc;
+            color: white;
+        }
+        .correct {
+            background-color: #34d399 !important;
+            color: white;
+        }
+        .incorrect {
+            background-color: #f87171 !important;
+            color: white;
+        }
+        @media (max-width: 640px) {
+            .quiz-container {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .option {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">Web Engineering Quiz</h1>
+        <div id="quiz">
+            <div id="question" class="text-lg font-medium text-gray-800 mb-4"></div>
+            <div id="options" class="space-y-3"></div>
+            <div id="feedback" class="mt-4 text-sm text-gray-600"></div>
+            <button id="next-btn" class="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50" disabled>Next</button>
+        </div>
+        <div id="result" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-indigo-600 mb-4">Quiz Completed!</h2>
+            <p id="score" class="text-lg text-gray-800 mb-4"></p>
+            <button id="restart-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What is Web Engineering?",
+                options: [
+                    "Designing hardware for web servers",
+                    "Applying software engineering principles to web development",
+                    "Creating social media platforms",
+                    "Managing web traffic"
+                ],
+                answer: "Applying software engineering principles to web development",
+                explanation: "Web Engineering involves using software engineering principles to build efficient, reliable, and secure websites and web applications."
+            },
+            {
+                question: "Why is Web Engineering important for a banking website?",
+                options: [
+                    "It ensures the website is visually appealing",
+                    "It guarantees fast loading, security, and usability",
+                    "It reduces the need for a database",
+                    "It eliminates the need for user interaction"
+                ],
+                answer: "It guarantees fast loading, security, and usability",
+                explanation: "A banking website needs to load quickly, be secure to protect financial data, and have a user-friendly design, all of which are ensured by Web Engineering."
+            },
+            {
+                question: "Which technology is primarily used for structuring web pages?",
+                options: ["JavaScript", "CSS", "HTML", "PHP"],
+                answer: "HTML",
+                explanation: "HTML is used to define the structure of web pages, such as headings, paragraphs, and links."
+            },
+            {
+                question: "What does CSS contribute to web development?",
+                options: ["Interactivity", "Styling", "Data storage", "Server-side logic"],
+                answer: "Styling",
+                explanation: "CSS is used to style web pages, controlling aspects like colors, fonts, and layouts."
+            },
+            {
+                question: "Which technology adds interactivity to a website?",
+                options: ["MySQL", "JavaScript", "HTML", "PHP"],
+                answer: "JavaScript",
+                explanation: "JavaScript enables interactive features like animations, form validation, and dynamic content updates."
+            },
+            {
+                question: "What is the role of MySQL in web development?",
+                options: ["Styling web pages", "Storing website data", "Adding interactivity", "Structuring web pages"],
+                answer: "Storing website data",
+                explanation: "MySQL is a database management system used to store and retrieve website data."
+            },
+            {
+                question: "What happens when a user types a URL into a browser?",
+                options: [
+                    "The server directly displays the webpage",
+                    "The browser sends a request to the server, which processes it and sends back files",
+                    "The browser stores the webpage locally",
+                    "The webpage is downloaded as a desktop app"
+                ],
+                answer: "The browser sends a request to the server, which processes it and sends back files",
+                explanation: "The browser sends a request to the server, which processes it and returns the necessary files to display the webpage."
+            },
+            {
+                question: "What is a static website?",
+                options: [
+                    "A website with content that changes based on user interactions",
+                    "A website with fixed content that doesn’t change for users",
+                    "A website that requires a database",
+                    "A website that runs on the server only"
+                ],
+                answer: "A website with fixed content that doesn’t change for users",
+                explanation: "Static websites have fixed content, like a company’s “About Us” page, that remains the same for all users."
+            },
+            {
+                question: "Which of the following is an example of a dynamic website?",
+                options: ["A company’s contact page", "Facebook", "A personal blog with fixed posts", "A PDF document online"],
+                answer: "Facebook",
+                explanation: "Dynamic websites, like Facebook, update content based on user interactions, such as displaying a personalized feed."
+            },
+            {
+                question: "What is the frontend of a web application?",
+                options: [
+                    "The database storing user data",
+                    "The visible part users interact with",
+                    "The server-side logic",
+                    "The network infrastructure"
+                ],
+                answer: "The visible part users interact with",
+                explanation: "The frontend includes buttons, menus, and other elements users see and interact with, like on YouTube."
+            },
+            {
+                question: "What is a web application?",
+                options: [
+                    "A desktop program installed on a computer",
+                    "A software program that runs in a web browser",
+                    "A mobile app available on app stores",
+                    "A server-side database system"
+                ],
+                answer: "A software program that runs in a web browser",
+                explanation: "Web applications run in browsers and do not require installation, like Google Docs or Amazon."
+            },
+            {
+                question: "Which of the following is an example of a web application?",
+                options: ["Microsoft Word", "Google Docs", "Adobe Photoshop", "Windows Explorer"],
+                answer: "Google Docs",
+                explanation: "Google Docs is a web application that allows users to create and edit documents online via a browser."
+            },
+            {
+                question: "What is a common reason for web application failure?",
+                options: [
+                    "Using too many colors in the design",
+                    "Lack of proper planning",
+                    "Having too many users",
+                    "Using only HTML"
+                ],
+                answer: "Lack of proper planning",
+                explanation: "Poor planning can lead to slow performance, security risks, and difficult maintenance."
+            },
+            {
+                question: "Why might an online store crash during Black Friday?",
+                options: [
+                    "It uses JavaScript",
+                    "It was not designed to handle high traffic",
+                    "It lacks a database",
+                    "It has too many images"
+                ],
+                answer: "It was not designed to handle high traffic",
+                explanation: "Without scalability, a website may crash under high traffic, like during Black Friday sales."
+            },
+            {
+                question: "What does Web Engineering ensure for web applications?",
+                options: [
+                    "They are only accessible on desktops",
+                    "They are well-designed, secure, and scalable",
+                    "They use minimal colors",
+                    "They avoid user interaction"
+                ],
+                answer: "They are well-designed, secure, and scalable",
+                explanation: "Web Engineering focuses on creating applications that perform well, are secure, and can handle growth."
+            },
+            {
+                question: "What is a document-centric website?",
+                options: [
+                    "A website that allows user interactions",
+                    "A simple website with mostly text and images",
+                    "A website that processes payments",
+                    "A website that requires a database"
+                ],
+                answer: "A simple website with mostly text and images",
+                explanation: "Document-centric websites, like Wikipedia, contain static content with minimal user interaction."
+            },
+            {
+                question: "Which of the following is an example of a document-centric website?",
+                options: ["Amazon", "Wikipedia", "WhatsApp Web", "Google Docs"],
+                answer: "Wikipedia",
+                explanation: "Wikipedia is a document-centric website focused on providing information with limited user interaction."
+            },
+            {
+                question: "What is a key advantage of document-centric websites?",
+                options: [
+                    "They allow complex user interactions",
+                    "They are fast and easy to maintain",
+                    "They require frequent updates",
+                    "They need advanced databases"
+                ],
+                answer: "They are fast and easy to maintain",
+                explanation: "Document-centric websites load quickly and are simple to maintain due to their static nature."
+            },
+            {
+                question: "What is a disadvantage of document-centric websites?",
+                options: [
+                    "They are slow to load",
+                    "They lack user interaction",
+                    "They are highly scalable",
+                    "They require no maintenance"
+                ],
+                answer: "They lack user interaction",
+                explanation: "These websites do not support features like commenting or form submissions."
+            },
+            {
+                question: "What defines an interactive and transactional website?",
+                options: [
+                    "It has fixed content",
+                    "It allows users to interact, like making purchases",
+                    "It avoids databases",
+                    "It is only accessible on mobile devices"
+                ],
+                answer: "It allows users to interact, like making purchases",
+                explanation: "Interactive and transactional websites, like Amazon, enable actions such as shopping and form submissions."
+            },
+            {
+                question: "Which is an example of an interactive and transactional website?",
+                options: [
+                    "A company’s “About Us” page",
+                    "An online banking website",
+                    "A static blog",
+                    "A PDF viewer"
+                ],
+                answer: "An online banking website",
+                explanation: "Online banking websites allow users to check balances, transfer money, and perform transactions."
+            },
+            {
+                question: "What is a disadvantage of interactive and transactional websites?",
+                options: [
+                    "They are too simple to maintain",
+                    "They require regular security updates",
+                    "They lack user interaction",
+                    "They are always static"
+                ],
+                answer: "They require regular security updates",
+                explanation: "These websites use databases and handle sensitive data, necessitating frequent security updates."
+            },
+            {
+                question: "What is a workflow-based application?",
+                options: [
+                    "A website for reading news",
+                    "A system that automates business tasks",
+                    "A static website with fixed content",
+                    "A database management tool"
+                ],
+                answer: "A system that automates business tasks",
+                explanation: "Workflow-based applications automate processes like leave requests or order processing."
+            },
+            {
+                question: "Which is an example of a workflow-based application?",
+                options: ["A news website", "An HR management system", "A static blog", "A photo gallery"],
+                answer: "An HR management system",
+                explanation: "HR management systems automate tasks like managing employee records and leave requests."
+            },
+            {
+                question: "What is a key advantage of workflow-based applications?",
+                options: [
+                    "They are simple to develop",
+                    "They reduce manual work",
+                    "They require no training",
+                    "They avoid databases"
+                ],
+                answer: "They reduce manual work",
+                explanation: "These applications improve efficiency by automating repetitive tasks."
+            },
+            {
+                question: "What is a collaborative and social web application?",
+                options: [
+                    "A website with fixed content",
+                    "A website where users can share and interact",
+                    "A website without user accounts",
+                    "A database management tool"
+                ],
+                answer: "A website where users can share and interact",
+                explanation: "Collaborative and social web applications, like Facebook, allow users to post, comment, and share content."
+            },
+            {
+                question: "Which is an example of a collaborative and social web application?",
+                options: [
+                    "A company’s contact page",
+                    "Twitter (now X)",
+                    "A static blog",
+                    "A PDF document"
+                ],
+                answer: "Twitter (now X)",
+                explanation: "Twitter (X) allows users to post updates, comment, and engage with others."
+            },
+            {
+                question: "What is a disadvantage of collaborative and social web applications?",
+                options: [
+                    "They are easy to control",
+                    "They can have privacy issues",
+                    "They lack user engagement",
+                    "They are static"
+                ],
+                answer: "They can have privacy issues",
+                explanation: "These applications may expose personal details if not properly managed."
+            },
+            {
+                question: "What is a web portal?",
+                options: [
+                    "A website with fixed content",
+                    "A website that collects information from multiple sources",
+                    "A website without user interaction",
+                    "A database management tool"
+                ],
+                answer: "A website that collects information from multiple sources",
+                explanation: "Web portals, like Google News, aggregate content from various sources in one place."
+            },
+            {
+                question: "Which is an example of a web portal?",
+                options: ["A static blog", "Google News", "A PDF viewer", "A photo gallery"],
+                answer: "Google News",
+                explanation: "Google News collects news articles from multiple sources for easy access."
+            },
+            {
+                question: "What is an advantage of web portals?",
+                options: [
+                    "They are always static",
+                    "They provide all information in one place",
+                    "They require no updates",
+                    "They avoid user interaction"
+                ],
+                answer: "They provide all information in one place",
+                explanation: "Web portals save time by offering centralized access to diverse information."
+            },
+            {
+                question: "What is a ubiquitous web application?",
+                options: [
+                    "A website with fixed content",
+                    "A smart website that adapts to user preferences",
+                    "A website without a database",
+                    "A website only for desktops"
+                ],
+                answer: "A smart website that adapts to user preferences",
+                explanation: "Ubiquitous web applications, like Google Maps, adjust based on location or device."
+            },
+            {
+                question: "Which is an example of a ubiquitous web application?",
+                options: [
+                    "A static blog",
+                    "Google Maps",
+                    "A PDF document",
+                    "A company’s “About Us” page"
+                ],
+                answer: "Google Maps",
+                explanation: "Google Maps adapts to show locations based on the user’s current position."
+            },
+            {
+                question: "What is a product-based characteristic of a web application?",
+                options: [
+                    "The number of users",
+                    "The quality of content",
+                    "The type of device used",
+                    "The user’s background"
+                ],
+                answer: "The quality of content",
+                explanation: "Product-based characteristics focus on quality, like useful and relevant content."
+            },
+            {
+                question: "Why is navigation important in a web application?",
+                options: [
+                    "It stores user data",
+                    "It ensures users can find information quickly",
+                    "It processes payments",
+                    "It adds interactivity"
+                ],
+                answer: "It ensures users can find information quickly",
+                explanation: "Good navigation helps users explore the website easily, like finding menus on a banking site."
+            },
+            {
+                question: "What is a usage-based characteristic of a web application?",
+                options: [
+                    "The quality of images",
+                    "The variety of devices used to access it",
+                    "The server-side logic",
+                    "The database structure"
+                ],
+                answer: "The variety of devices used to access it",
+                explanation: "Usage-based characteristics focus on how users access the application, like on different devices."
+            },
+            {
+                question: "Why should a web application support different user backgrounds?",
+                options: [
+                    "To limit access to certain users",
+                    "To ensure it is usable by people with varying experience levels",
+                    "To reduce the need for a database",
+                    "To avoid interactivity"
+                ],
+                answer: "To ensure it is usable by people with varying experience levels",
+                explanation: "Applications should be easy for both novice and experienced users, like on social media platforms."
+            },
+            {
+                question: "What is software system architecture?",
+                options: [
+                    "The design of a website’s colors",
+                    "The overall structure of a computer system",
+                    "The database management system",
+                    "The user interface design"
+                ],
+                answer: "The overall structure of a computer system",
+                explanation: "Software system architecture defines components, their interactions, and communication methods."
+            },
+            {
+                question: "What does the conceptual view in software architecture show?",
+                options: [
+                    "The code organization",
+                    "The main parts of the system without technical details",
+                    "The runtime behavior",
+                    "The database structure"
+                ],
+                answer: "The main parts of the system without technical details",
+                explanation: "The conceptual view uses simple diagrams to show system modules, like “Users” and “Orders” in an online store."
+            },
+            {
+                question: "What does the runtime view illustrate?",
+                options: [
+                    "The code files",
+                    "The flow of actions when the system is running",
+                    "The database schema",
+                    "The hardware setup"
+                ],
+                answer: "The flow of actions when the system is running",
+                explanation: "The runtime view shows how parts interact during operation, like the checkout process in an online store."
+            },
+            {
+                question: "What is a quality need in software architecture?",
+                options: [
+                    "A feature users request",
+                    "A non-functional requirement like performance",
+                    "The user interface design",
+                    "The database type"
+                ],
+                answer: "A non-functional requirement like performance",
+                explanation: "Quality needs include performance, scalability, and security, which enhance system reliability."
+            },
+            {
+                question: "What is a functional requirement?",
+                options: [
+                    "The speed of the application",
+                    "A feature the app must perform, like placing orders",
+                    "The security protocol",
+                    "The hardware setup"
+                ],
+                answer: "A feature the app must perform, like placing orders",
+                explanation: "Functional requirements define what the app does, like allowing users to order food in a delivery app."
+            },
+            {
+                question: "What is Web Application Architecture (WAA)?",
+                options: [
+                    "The physical network setup",
+                    "The software structure of a web app",
+                    "The user interface design",
+                    "The database management system"
+                ],
+                answer: "The software structure of a web app",
+                explanation: "WAA defines how the frontend, backend, and database interact in a web application."
+            },
+            {
+                question: "What is Web Infrastructure Architecture (WPA)?",
+                options: [
+                    "The software logic of a web app",
+                    "The physical components and network setup",
+                    "The user interface design",
+                    "The database structure"
+                ],
+                answer: "The physical components and network setup",
+                explanation: "WPA includes servers, networks, and data centers that support a website."
+            },
+            {
+                question: "What is the role of a firewall in web application architecture?",
+                options: [
+                    "It stores data",
+                    "It controls traffic and enhances security",
+                    "It streams media content",
+                    "It processes business logic"
+                ],
+                answer: "It controls traffic and enhances security",
+                explanation: "A firewall filters traffic to allow only safe data, protecting the website from malicious requests."
+            },
+            {
+                question: "What does a proxy do in web application architecture?",
+                options: [
+                    "Stores user data",
+                    "Caches content to speed up loading",
+                    "Processes payments",
+                    "Manages the database"
+                ],
+                answer: "Caches content to speed up loading",
+                explanation: "A proxy stores cached content to serve pages faster, like on YouTube."
+            },
+            {
+                question: "What is the presentation layer in layered web architecture?",
+                options: [
+                    "The database management system",
+                    "The user interface displayed in the browser",
+                    "The server-side logic",
+                    "The network infrastructure"
+                ],
+                answer: "The user interface displayed in the browser",
+                explanation: "The presentation layer includes HTML, CSS, and JavaScript for the frontend."
+            },
+            {
+                question: "What is a disadvantage of two-layer architecture?",
+                options: [
+                    "It is highly scalable",
+                    "It has tight coupling and no redundancy",
+                    "It is complex to manage",
+                    "It supports millions of users"
+                ],
+                answer: "It has tight coupling and no redundancy",
+                explanation: "In two-layer architecture, the client and server are closely linked, and there’s no backup if the server fails."
+            },
+            {
+                question: "What is the application layer in three-layer architecture?",
+                options: [
+                    "The database storage",
+                    "The business logic and processes",
+                    "The user interface",
+                    "The network setup"
+                ],
+                answer: "The business logic and processes",
+                explanation: "The application layer handles rules and workflows, like calculating prices in an online store."
+            },
+            {
+                question: "What is a key advantage of N-layer architecture?",
+                options: [
+                    "It is simple and cheap",
+                    "It offers high scalability and redundancy",
+                    "It avoids databases",
+                    "It is best for small systems"
+                ],
+                answer: "It offers high scalability and redundancy",
+                explanation: "N-layer architecture supports large-scale systems like Amazon by using multiple servers for scalability and backup."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
+
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const feedbackEl = document.getElementById('feedback');
+        const nextBtn = document.getElementById('next-btn');
+        const quizEl = document.getElementById('quiz');
+        const resultEl = document.getElementById('result');
+        const scoreEl = document.getElementById('score');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function loadQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionEl.textContent = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+            optionsEl.innerHTML = '';
+            feedbackEl.textContent = '';
+            nextBtn.disabled = true;
+            selectedOption = null;
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option w-full text-left py-3 px-4 border border-gray-300 rounded-lg text-gray-800 hover:bg-indigo-100';
+                button.textContent = option;
+                button.addEventListener('click', () => selectOption(option, button));
+                optionsEl.appendChild(button);
+            });
+        }
+
+        function selectOption(option, button) {
+            if (selectedOption) return; // Prevent multiple selections
+            selectedOption = option;
+            const currentQuestion = quizData[currentQuestionIndex];
+            const buttons = optionsEl.getElementsByClassName('option');
+            for (let btn of buttons) {
+                btn.disabled = true;
+                if (btn.textContent === option) {
+                    btn.classList.add('selected');
+                }
+            }
+
+            if (option === currentQuestion.answer) {
+                button.classList.add('correct');
+                score++;
+                feedbackEl.textContent = `Correct! ${currentQuestion.explanation}`;
+                feedbackEl.className = 'mt-4 text-sm text-green-600';
+            } else {
+                button.classList.add('incorrect');
+                feedbackEl.textContent = `Incorrect. The correct answer is "${currentQuestion.answer}". ${currentQuestion.explanation}`;
+                feedbackEl.className = 'mt-4 text-sm text-red-600';
+                // Highlight correct answer
+                for (let btn of buttons) {
+                    if (btn.textContent === currentQuestion.answer) {
+                        btn.classList.add('correct');
+                    }
+                }
+            }
+            nextBtn.disabled = false;
+        }
+
+        function showResult() {
+            quizEl.classList.add('hidden');
+            resultEl.classList.remove('hidden');
+            scoreEl.textContent = `You scored ${score} out of ${quizData.length} (${((score / quizData.length) * 100).toFixed(2)}%)`;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            quizEl.classList.remove('hidden');
+            resultEl.classList.add('hidden');
+            loadQuestion();
+        });
+
+        // Load the first question
+        loadQuestion();
+    </script>
+</body>
+</html>
